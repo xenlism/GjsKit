@@ -13,7 +13,7 @@ export const $ = {
     box: (params) => new BoxWrapper(params),
     button: (params) => {
         const btn = new ButtonWrapper();
-        if (params?.text) btn.text(params.text);
+        if (params?.text) btn.label(params.text); // แก้เป็น label
         return btn;
     },
     label: (params) => {

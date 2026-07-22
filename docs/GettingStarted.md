@@ -21,7 +21,6 @@ app.on('activate', () => {
         app.quit();
     });
     
-    // In GTK4, you must add the window to the application and call present()
     app.add_window(win);
     win.child(btn).present();
 });

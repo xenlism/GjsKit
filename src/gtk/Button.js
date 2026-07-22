@@ -6,8 +6,8 @@ export class ButtonWrapper extends WidgetWrapper {
         super(new Gtk.Button(params));
     }
 
-    text(label) {
-        this._widget.set_label(label);
+    label(text) {
+        this._widget.set_label(text);
         return this;
     }
 }

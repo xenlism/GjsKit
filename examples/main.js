@@ -5,7 +5,7 @@ const app = $.application('org.gjskit.example');
 
 app.on('activate', () => {
     const win = $.window({ title: "GjsKit Framework" });
-    app.add_window(win); // จำเป็นสำหรับ GTK4
+    app.add_window(win);
     
     const box = $.box({ orientation: Gtk.Orientation.VERTICAL, spacing: 10 });
     const lbl = $.label({ text: "Hello from Fluent API!" });
@@ -16,7 +16,7 @@ app.on('activate', () => {
     });
     
     box.append(lbl).append(btn);
-    win.child(box).present(); // ใช้ present() แทน visible(true)
+    win.child(box).present();
 });
 
 app.run(ARGV);

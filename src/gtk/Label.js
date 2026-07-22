@@ -6,8 +6,8 @@ export class LabelWrapper extends WidgetWrapper {
         super(new Gtk.Label(params));
     }
 
-    text(label) {
-        this._widget.set_label(label);
+    text(text) {
+        this._widget.set_label(text);
         return this;
     }
 }
