@@ -1,6 +1,8 @@
 # Developing GNOME Shell Extensions with GjsKit
 
-GjsKit fully supports developing GNOME Shell Extensions (GNOME 45+) using `St` (Shell Toolkit).
+GjsKit fully supports developing GNOME Shell Extensions (GNOME 45 through 50, verified) using `St` (Shell Toolkit).
+
+> **GNOME 50 note:** GNOME Shell 50 dropped X11 support entirely (Wayland only). GjsKit's `St` wrappers don't touch `X11`, `Meta`, or `Clutter` directly, so nothing in this library is affected — but if your own extension code still branches on X11-specific behavior, that code path will simply never run on GNOME 50.
 
 Because `St` cannot be imported in a standalone GJS environment, we separated the `St` wrappers and its own `$` factory into `src/st/`.
 

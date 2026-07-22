@@ -1,5 +1,3 @@
-import GObject from 'gi://GObject';
-
 export class WidgetWrapper {
     constructor(widget) {
         this._widget = widget;
@@ -90,15 +88,39 @@ export class WidgetWrapper {
     }
 
     // เพิ่ม: การทำลาย Widget อย่างปลอดภัย
+    //
+    // GTK4 removed Gtk.Widget.destroy() for anything that isn't a
+    // toplevel (see https://discourse.gnome.org/t/how-to-not-destroy-a-widget/7449).
+    // Calling it unconditionally (as before) always threw for
+    // Box/Button/Label/etc. and was only ever silently swallowed by the
+    // try/catch below, so it never actually did anything useful there.
+    // St (Clutter-based) actors are unaffected and still support
+    // destroy(), so we branch on which toolkit we're wrapping.
     destroy() {
+        const widget = this._widget;
+        if (!widget) return this;
+
         try {
-            if ('unparent' in this._widget) {
-                this._widget.unparent();
+            const isSt = 'add_style_class_name' in widget;
+
+            if (isSt) {
+                // St/Clutter actors: destroy() unparents and recursively
+                // destroys children. Still valid on GNOME 47-50.
+                if ('destroy' in widget) widget.destroy();
+            } else if ('close' in widget) {
+                // GTK4 toplevels (Gtk.Window and subclasses) are closed,
+                // not destroyed.
+                widget.close();
+            } else if ('unparent' in widget && widget.get_parent?.()) {
+                // GTK4 non-toplevels: unparent and let refcounting
+                // finalize the object once nothing else references it.
+                widget.unparent();
             }
-            this._widget.destroy();
         } catch (e) {
             // ป้องกัน Error ถ้า Widget ถูกทำลายไปแล้ว
         }
+
+        this._widget = null;
         return this;
     }
 }

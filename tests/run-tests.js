@@ -1,6 +1,8 @@
 import { $ } from '../src/index.js';
 import GLib from 'gi://GLib';
 
+const GJS_HAS_ONCE_API = typeof GLib.timeout_add_once === 'function';
+
 let testsPassed = 0;
 let testsFailed = 0;
 
@@ -47,6 +49,35 @@ try {
     assert(idleCalled === true, "GLib idle utility should execute callback");
 } catch (e) {
     assert(false, `GLib Test failed with error: ${e.message}`);
+}
+
+// Test GLib one-shot Utils ($.timeoutOnce / $.idleOnce)
+// On GNOME 50+ these use the new GLib.timeout_add_once/idle_add_once API;
+// on GNOME 47-49 they transparently fall back to the classic functions.
+try {
+    print(`(GLib one-shot API detected: ${GJS_HAS_ONCE_API})`);
+
+    let onceIdleCalls = 0;
+    $.idleOnce(() => {
+        onceIdleCalls++;
+    });
+
+    let onceTimeoutCalls = 0;
+    $.timeoutOnce(20, () => {
+        onceTimeoutCalls++;
+    });
+
+    const loop = new GLib.MainLoop(null, false);
+    GLib.timeout_add(GLib.PRIORITY_DEFAULT, 150, () => {
+        loop.quit();
+        return false;
+    });
+    loop.run();
+
+    assert(onceIdleCalls === 1, "idleOnce should execute its callback exactly once");
+    assert(onceTimeoutCalls === 1, "timeoutOnce should execute its callback exactly once");
+} catch (e) {
+    assert(false, `GLib one-shot Test failed with error: ${e.message}`);
 }
 
 print("\n--- Test Summary ---");

@@ -1,6 +1,6 @@
 # Getting Started with GjsKit
 
-GjsKit requires a modern version of GJS (GNOME 41+ recommended for full ES6 module support).
+GjsKit requires a modern version of GJS (GNOME 41+ recommended for full ES6 module support). The GTK4 and St wrappers have been reviewed against GNOME 45 through GNOME 50; see [HANDOVER.md](../HANDOVER.md) for the details of that review.
 
 ## 1. Running your first GTK4 app
 

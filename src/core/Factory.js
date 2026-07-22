@@ -4,7 +4,7 @@ import { BoxWrapper } from '../gtk/Box.js';
 import { LabelWrapper } from '../gtk/Label.js';
 import { ApplicationWrapper } from '../gtk/Application.js';
 import { FileWrapper } from '../gio/File.js';
-import { timeout, idle } from '../glib/Utils.js';
+import { timeout, idle, timeoutOnce, idleOnce } from '../glib/Utils.js';
 
 export const $ = {
     // GTK
@@ -25,5 +25,7 @@ export const $ = {
     // Gio / GLib
     file: (path) => new FileWrapper(path),
     timeout,
-    idle
+    idle,
+    timeoutOnce,
+    idleOnce
 };

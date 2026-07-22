@@ -2,12 +2,16 @@
 
 > **GjsKit** is a lightweight Fluent API framework for GJS (GNOME JavaScript) that makes developing GTK4, St (GNOME Shell), Gio, and GLib applications easier. It does not invent a new language and does not replace GJS—it simply wraps it in a clean, chainable API.
 
-**Developed with Z.ai GLM 5.2**
+**Developed with Z.ai GLM 5.2. Reviewed and updated for GNOME 50 compatibility.**
+
+## GNOME Compatibility
+Verified against GNOME Shell 45 through 50. See [HANDOVER.md](./HANDOVER.md) for the full GNOME 50 compatibility review, what changed, and how to verify it on a real system.
 
 ## Features
 - **Unified API:** Write the same code for both GTK4 (Desktop) and St (GNOME Shell). GjsKit automatically translates methods (e.g., `append` -> `add_child`) and values (e.g., opacity `0.1-1.0` -> `0-255`) under the hood.
 - **Fluent API (Method Chaining):** Write cleaner and more readable UI code.
-- **Gio / GLib Utilities:** Simplified file operations and event loop management.
+- **Gio / GLib Utilities:** Simplified file operations and event loop management, including GNOME 50's one-shot `timeoutOnce`/`idleOnce` helpers (with automatic fallback on GNOME 47-49).
+- **GTK4-correct `destroy()`:** Safely tears down widgets on both toolkits, respecting GTK4's removal of `destroy()` for non-toplevel widgets.
 - **Pure ES6:** No TypeScript compilation or bundlers required. Runs directly on GJS.
 - **Single Entry Point:** Everything starts with the `$` factory.
 
@@ -73,7 +77,7 @@ box.append(lbl).append(btn);
 ```
 
 ## Documentation
-Please refer to the [docs/](./docs) directory for detailed API references.
+Please refer to the [docs/](./docs) directory for detailed API references, and [HANDOVER.md](./HANDOVER.md) for the GNOME 50 porting notes.
 
 ## Testing
 Run the test suite using GJS:
