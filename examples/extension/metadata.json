@@ -1,0 +1,6 @@
+{
+  "uuid": "gjskit-example@yourname.com",
+  "name": "GjsKit Example Extension",
+  "description": "An example GNOME Shell Extension using GjsKit Fluent API.",
+  "shell-version": ["45", "46", "47", "48", "49", "50"]
+}
