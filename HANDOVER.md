@@ -151,3 +151,75 @@ Before shipping, please verify on an actual GNOME 50 system:
 `patch.sh` at the repo root is an empty (0-byte) file. It isn't referenced
 by anything in `src/`, `tests/`, `docs/`, or the examples, so it was left
 alone — flagging it here in case it was meant to hold something.
+
+---
+
+## Addendum — Widget expansion pass (post-GNOME-50 review)
+
+After the GNOME 50 review above, five GTK4 widgets and four St widgets were
+added to close the biggest gaps in widget coverage:
+
+- **GTK4** (`src/gtk/`): `EntryWrapper`, `SwitchWrapper`, `CheckButtonWrapper`,
+  `GridWrapper`, `ListBoxWrapper`
+- **St** (`src/st/`): `StIconWrapper`, `StBinWrapper`, `StScrollViewWrapper`,
+  `StEntryWrapper`
+
+All follow the existing wrapper conventions (extend `WidgetWrapper` /
+`StWidgetWrapper`, return `this` from setters). Where a widget's real
+GObject property name doesn't match the friendly alias GjsKit's factory
+already uses elsewhere (`text` → `label`, `placeholder` →
+`placeholder-text`), the wrapper's own constructor destructures the alias
+out of `params` before forwarding the rest to the native constructor —
+see `EntryWrapper`/`CheckButtonWrapper` for the pattern. This keeps the
+alias handling self-contained in the wrapper itself instead of only living
+in the `$` factory, so `new EntryWrapper({ placeholder: '...' })` works
+the same whether it's called directly or through `$.entry(...)`.
+
+**Bonus fix while in this area:** `$.button(params)` and `$.label(params)`
+in `src/core/Factory.js` previously called `new ButtonWrapper()` /
+`new LabelWrapper()` with **no arguments at all**, so any property in
+`params` other than `text` (e.g. `{ hexpand: true }`) was silently
+dropped. This was a pre-existing bug, not something introduced by the
+GNOME 50 work — it's now fixed by destructuring the `text` alias out and
+forwarding everything else to the constructor.
+
+**Not covered by automated tests.** Like the original GTK4 widgets, none
+of the 9 new widgets can be instantiated in the headless test suite —
+GTK4 needs a display and St needs a Clutter/Mutter stage, both of which
+segfault outside a running session. They were reviewed statically against
+the GTK4/St documentation for correct property and method names, but have
+not been smoke-tested on a live GNOME session. Please verify before
+relying on them:
+
+```javascript
+// GTK4 — run inside examples/main.js or similar, with a display
+const entry = $.entry({ placeholder: "Your name" });
+const sw = $.switch({ active: true });
+const cb = $.checkButton({ text: "Agree?" });
+const grid = $.grid().attach(entry, 0, 0).attach(sw, 0, 1).attach(cb, 0, 2);
+
+// St — run inside a real GNOME Shell 50 extension
+const icon = $.icon({ icon_name: 'face-laugh-symbolic' });
+const scroll = $.scrollView().child($.box({ vertical: true }).append(icon));
+```
+
+### Files changed in this pass
+
+| File | Change |
+|---|---|
+| `src/gtk/Entry.js` | New — `EntryWrapper` |
+| `src/gtk/Switch.js` | New — `SwitchWrapper` |
+| `src/gtk/CheckButton.js` | New — `CheckButtonWrapper` |
+| `src/gtk/Grid.js` | New — `GridWrapper` |
+| `src/gtk/ListBox.js` | New — `ListBoxWrapper` |
+| `src/st/StIcon.js` | New — `StIconWrapper` |
+| `src/st/StBin.js` | New — `StBinWrapper` |
+| `src/st/StScrollView.js` | New — `StScrollViewWrapper` |
+| `src/st/StEntry.js` | New — `StEntryWrapper` |
+| `src/index.js` | Re-export the 5 new GTK4 widgets |
+| `src/st/index.js` | Re-export the 4 new St widgets |
+| `src/core/Factory.js` | Added `$.entry`/`$.switch`/`$.checkButton`/`$.grid`/`$.listBox`; fixed `$.button`/`$.label` params forwarding |
+| `src/st/Factory.js` | Added `$.icon`/`$.bin`/`$.scrollView`/`$.entry` |
+| `README.md` | Updated status table, features, project structure, roadmap, added usage examples |
+| `docs/API.md` | Documented all 9 new widgets |
+| `HANDOVER.md` | This addendum |

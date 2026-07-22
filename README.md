@@ -18,8 +18,8 @@ GjsKit does not invent a new language and does not replace GJS — it wraps nati
 The project is built around four small layers:
 
 - **Core** — `WidgetWrapper` (the shared base class) and the `$` factory
-- **GTK4** — Desktop application widgets (`Application`, `Window`, `Box`, `Button`, `Label`)
-- **St** — GNOME Shell widgets (`BoxLayout`, `Button`, `Label`), behind a separate entry point so `St` is never imported into a headless/desktop process
+- **GTK4** — Desktop application widgets (`Application`, `Window`, `Box`, `Button`, `Label`, `Entry`, `Switch`, `CheckButton`, `Grid`, `ListBox`)
+- **St** — GNOME Shell widgets (`BoxLayout`, `Button`, `Label`, `Icon`, `Bin`, `ScrollView`, `Entry`), behind a separate entry point so `St` is never imported into a headless/desktop process
 - **Gio / GLib** — File access and event-loop helpers (`timeout`, `idle`, `timeoutOnce`, `idleOnce`)
 
 Toolkit differences (`append` vs `add_child`, opacity `0.0–1.0` vs `0–255`, `set_sensitive` vs `set_reactive`, margin `start/end` vs `left/right`) are translated automatically inside the wrapper, so application code doesn't need to branch on which toolkit it's running against.
@@ -33,17 +33,20 @@ Toolkit differences (`append` vs `add_child`, opacity `0.0–1.0` vs `0–255`, 
 | Core `WidgetWrapper` (chaining, margin, opacity, style_class, visible, enabled, focus, remove) | ✅ Complete |
 | `destroy()` — GTK4/St-correct teardown | ✅ Fixed for GNOME 50 (see [HANDOVER.md](./HANDOVER.md)) |
 | GTK4 widgets: Application, Window, Box, Button, Label | ✅ Complete (basic set) |
+| GTK4 widgets: Entry, Switch, CheckButton, Grid, ListBox | ✅ Complete |
 | St widgets: BoxLayout, Button, Label | ✅ Complete (basic set) |
+| St widgets: Icon, Bin, ScrollView, Entry | ✅ Complete |
+| `$.button`/`$.label` factory params forwarding (GTK4) | ✅ Fixed — non-alias params (e.g. `hexpand`, `css_classes`) are now forwarded to the native constructor instead of being silently dropped |
 | Gio `FileWrapper` (exists/read) | ✅ Complete (read-only) |
 | GLib utilities: `timeout`, `idle` | ✅ Complete |
 | GLib one-shot utilities: `timeoutOnce`, `idleOnce` (GNOME 50 API, auto-fallback on 47-49) | ✅ Complete |
 | GNOME 45–50 compatibility review | ✅ Complete — see [HANDOVER.md](./HANDOVER.md) |
 | Headless test suite (`tests/run-tests.js`) | ✅ Passing (5/5, verified on GNOME 50) |
-| Expanded widget set (Entry, Switch, Grid, Adwaita widgets, St.Icon, etc.) | ⏳ Planned — not started |
+| Further widget set (Adwaita widgets, Stack, St.PopupMenu helpers, etc.) | ⏳ Planned — not started |
 | TypeScript type definitions | ⏳ Planned — not started |
 | npm / package distribution | ⏳ Planned — not started |
 | CI (automated `gjs` test runs) | ⏳ Planned — not started |
-| GTK4 widget instantiation tests (needs a display; can't run headless) | 🚧 Manual smoke-test only, no automated coverage |
+| GTK4/St widget instantiation tests (needs a display/stage; can't run headless) | 🚧 Manual smoke-test only, no automated coverage — this includes the 9 widgets added in this pass |
 
 *"Complete" here means implemented and covered by what the test suite / manual review can verify at this project's current size — this is a small utility library, not a full application, so see the Roadmap below for what's intentionally still out of scope.*
 
@@ -53,6 +56,7 @@ Toolkit differences (`append` vs `add_child`, opacity `0.0–1.0` vs `0–255`, 
 
 - **Unified API:** Write the same code for both GTK4 (Desktop) and St (GNOME Shell). GjsKit automatically translates methods (e.g., `append` → `add_child`) and values (e.g., opacity `0.0–1.0` → `0–255`) under the hood.
 - **Fluent API (Method Chaining):** Every setter returns `this`, so UI code reads as a declarative chain.
+- **Widget Set:** Buttons, labels, entries, switches, check buttons, grids, list boxes, icons, bins, and scroll views — across both GTK4 and St.
 - **Gio / GLib Utilities:** Simplified file operations and event loop management, including GNOME 50's one-shot `timeoutOnce`/`idleOnce` helpers (with automatic fallback on GNOME 47-49).
 - **GTK4-correct `destroy()`:** Safely tears down widgets on both toolkits, respecting GTK4's removal of `destroy()` for non-toplevel widgets.
 - **Pure ES6:** No TypeScript compilation or bundlers required. Runs directly on GJS.
@@ -98,8 +102,10 @@ GjsKit/
 │   └── run-tests.js
 ├── src/
 │   ├── core/       # Base Wrapper & Main Factory ($)
-│   ├── gtk/        # GTK4 Widgets (Application, Window, Box, Button, Label)
+│   ├── gtk/        # GTK4 Widgets (Application, Window, Box, Button, Label,
+│   │               #   Entry, Switch, CheckButton, Grid, ListBox)
 │   ├── st/         # GNOME Shell Widgets & St Factory ($)
+│   │               #   (BoxLayout, Button, Label, Icon, Bin, ScrollView, Entry)
 │   ├── gio/        # FileWrapper
 │   └── glib/       # timeout, idle, timeoutOnce, idleOnce utilities
 ├── HANDOVER.md     # GNOME 50 compatibility review notes
@@ -131,9 +137,12 @@ GjsKit/
 **Milestone:** verified working on the current GNOME release. ✅ *reached — see [HANDOVER.md](./HANDOVER.md)*
 
 ### Phase 3 — Wider Widget Coverage
-- ⏳ More GTK4 widgets (Entry, Switch, Grid, ListBox, Adwaita widgets)
-- ⏳ More St widgets (St.Icon, St.ScrollView, St.Entry)
-- ⏳ GTK4 widget tests that run against a real display (not just headless)
+- ✅ GTK4: Entry, Switch, CheckButton, Grid, ListBox
+- ✅ St: Icon, Bin, ScrollView, Entry
+- ⏳ Adwaita widgets (`Adw.*`), GTK4 Stack
+- ⏳ GTK4/St widget tests that run against a real display/stage (not just headless)
+
+**Milestone:** cover the most commonly requested form/input widgets. ✅ *reached — see [HANDOVER.md](./HANDOVER.md)*
 
 ### Phase 4 — Distribution
 - ⏳ npm package / versioned releases
@@ -201,6 +210,32 @@ btn.on('clicked', () => {
 });
 
 box.append(lbl).append(btn);
+```
+
+## Usage Example (New GTK4 Widgets)
+
+```javascript
+import { $ } from './src/index.js';
+
+const grid = $.grid({ row_spacing: 6, column_spacing: 6 });
+
+const name = $.entry({ placeholder: "Your name" });
+const enabled = $.switch({ active: true });
+const agree = $.checkButton({ text: "I agree to the terms" });
+
+grid.attach(name, 0, 0)
+    .attach(enabled, 0, 1)
+    .attach(agree, 0, 2);
+```
+
+## Usage Example (New St Widgets)
+
+```javascript
+import { $ } from './src/st/index.js';
+
+const icon = $.icon({ icon_name: 'face-laugh-symbolic', icon_size: 16 });
+const content = $.box({ vertical: true }).append(icon);
+const scroll = $.scrollView().child(content);
 ```
 
 ---

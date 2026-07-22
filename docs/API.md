@@ -5,12 +5,24 @@ The global factory function to create widgets.
 - Use `import { $ } from './src/index.js'` for GTK4.
 - Use `import { $ } from './src/st/index.js'` for GNOME Shell (St).
 
-### Widgets
+### Widgets (GTK4, via `./src/index.js`)
 - `$.application(appId: string)`: Creates a `Gtk.Application` (GTK4 only).
 - `$.window(params?)`: Creates a `Gtk.Window` (GTK4 only).
 - `$.box(params?)`: Creates a Box container.
-- `$.button(params?)`: Creates a Button. (Accepts `{ text: string }` or `{ label: string }`)
-- `$.label(params?)`: Creates a Label. (Accepts `{ text: string }`)
+- `$.button(params?)`: Creates a Button. (Accepts `{ text: string }` alias, or any real `Gtk.Button` property.)
+- `$.label(params?)`: Creates a Label. (Accepts `{ text: string }` alias, or any real `Gtk.Label` property.)
+- `$.entry(params?)`: Creates a `Gtk.Entry`. (Accepts `{ placeholder: string }` alias, or any real `Gtk.Entry` property, e.g. `{ text: "..." }`.)
+- `$.switch(params?)`: Creates a `Gtk.Switch`. (Accepts real `Gtk.Switch` properties, e.g. `{ active: true }`.)
+- `$.checkButton(params?)`: Creates a `Gtk.CheckButton`. (Accepts `{ text: string }` alias, or any real `Gtk.CheckButton` property, e.g. `{ active: true }`.)
+- `$.grid(params?)`: Creates a `Gtk.Grid` container.
+- `$.listBox(params?)`: Creates a `Gtk.ListBox` container.
+
+### Widgets (St / GNOME Shell, via `./src/st/index.js`)
+- `$.box(params?)`, `$.button(params?)`, `$.label(params?)`: as documented in the [README](../README.md).
+- `$.icon(params?)`: Creates a `St.Icon`. (Accepts real `St.Icon` properties, e.g. `{ icon_name: "face-laugh-symbolic" }`.)
+- `$.bin(params?)`: Creates a `St.Bin`, a single-child container.
+- `$.scrollView(params?)`: Creates a `St.ScrollView`, a scrollable single-child container.
+- `$.entry(params?)`: Creates a `St.Entry`. (Accepts real `St.Entry` properties, e.g. `{ text: "..." }`.)
 
 ### Gio / GLib Utilities (GTK4 only)
 - `$.file(path: string)`: Creates a `FileWrapper` for `Gio.File`.
@@ -62,6 +74,36 @@ All widgets extend this base class. GjsKit unifies the differences between GTK4 
 
 ### LabelWrapper
 - `text(text)`: Sets the label text.
+
+### EntryWrapper (GTK4)
+- `text(value?)`: Getter/setter. Call with no argument to read the current text, or with a string to set it.
+- `placeholder(text)`: Sets the placeholder text.
+
+### SwitchWrapper (GTK4)
+- `active(value?)`: Getter/setter. Call with no argument to read the on/off state, or with a boolean to set it.
+
+### CheckButtonWrapper (GTK4)
+- `label(text)`: Sets the check button's text.
+- `active(value?)`: Getter/setter. Call with no argument to read whether it's checked, or with a boolean to set it.
+
+### GridWrapper (GTK4)
+- `attach(widget, column, row, width = 1, height = 1)`: Places `widget` at the given grid cell, spanning `width` columns and `height` rows.
+
+### ListBoxWrapper (GTK4)
+- `append(widget)`: Appends a row widget. Use the base `remove(widget)` method (see `WidgetWrapper` above) to remove one.
+
+### StIconWrapper (St)
+- `icon_name(value?)`: Getter/setter for the icon name (e.g. `'face-laugh-symbolic'`).
+- `icon_size(value?)`: Getter/setter for the icon size in pixels.
+
+### StBinWrapper (St)
+- `child(widget)`: Sets the single child widget.
+
+### StScrollViewWrapper (St)
+- `child(widget)`: Sets the single (typically scrollable box) child widget.
+
+### StEntryWrapper (St)
+- `text(value?)`: Getter/setter. Call with no argument to read the current text, or with a string to set it.
 
 ### FileWrapper
 - `exists()`: Returns `boolean`.

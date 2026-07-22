@@ -3,3 +3,7 @@ export * from './StWidget.js';
 export * from './StButton.js';
 export * from './StLabel.js';
 export * from './StBoxLayout.js';
+export * from './StIcon.js';
+export * from './StBin.js';
+export * from './StScrollView.js';
+export * from './StEntry.js';
